@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block body %}
+
+<div class="shadow-lg jumbotron jumbotron-fluid bg-dark text-white">
+	<div class="container">
+		<h1 class="display-4">Moneykeeper - учет средств</h1>
+		<p class="lead">Главная страница приложения. Что интересует?</p>
+	</div>
+</div>
+<div class="container">
+	<div class="row">
+		<div class="col-md-4 mb-4">
+			<h2>Dashboard</h2>
+			<p>Сводка основных показателей: доходы, расходы, счета</p>
+			<a href="{{ url_for('dashboard') }}" class="shadow btn btn-primary">Dashboard <i class="fas fa-chart-line"></i></a>
+		</div>
+		<div class="col-md-4 mb-4">
+			<h2>Календарь</h2>
+			<p>Календарь доходов и расходов за определенный период. Добавление транзакций..</p>
+			<a href="{{ url_for('money_calendar') }}" class="shadow btn btn-primary">Календарь <i class="far fa-calendar"></i></a>
+		</div>
+		<div class="col-md-4 mb-4">
+			<h2>Планирование</h2>
+			<p>Функции планирования доходов, выплат, расходов за определенный период времени.</p>
+			<a href="{{ url_for('planning') }}" class="shadow btn btn-primary">Планирование <i class="fas fa-tasks"></i></a>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
