@@ -17,7 +17,7 @@
                                     <i class="fas fa-cash-register"></i>
                                 </label>
                             </div>
-                            <select id="oprType" name="trtype" class="form-control" onchange="showGroups(this.value, this.name);enabledBtnInCal();">
+                            <select id="oprType" name="trtype" class="form-control" onchange="creatingXMLHttpReq('show_groups', this);enabledBtnInCal();">
                                 <option>Выбор...</option>
                                 {% for tr_type in the_calendar.trans_type %}
                                 <option value="{{ tr_type.transacion_type_id }}">{{ tr_type.name }}</option>
@@ -30,7 +30,7 @@
                             <div class="input-group-prepend">
                                 <label for="oprGroup" class="input-group-text">Группа</label>
                             </div>
-                            <select id="oprGroup" name="group" class="form-control" onchange="showGroups(this.value, this.name);enabledBtnInCal()">
+                            <select id="oprGroup" name="group" class="form-control" onchange="creatingXMLHttpReq('show_groups', this);enabledBtnInCal()">
                                 <!-- by AJAX request -->
                             </select>
                         </div>
