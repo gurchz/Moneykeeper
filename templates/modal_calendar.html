@@ -1,0 +1,94 @@
+<!-- modal window -->
+<div class="modal fade add-operation-modal" tabindex="-1" role="dialog" aria-labelledby="addOprModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <form class="modal-content" action="{{ url_for('add_trn') }}" method="POST">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addOprModalLabel">Добавление операции</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row pb-2">
+                    <div class="col-md-4">
+                        <div class="input-group pb-2">
+                            <div class="input-group-prepend">
+                                <label for="oprType" class="input-group-text">
+                                    <i class="fas fa-cash-register"></i>
+                                </label>
+                            </div>
+                            <select id="oprType" name="trtype" class="form-control" onchange="showGroups(this.value, this.name);enabledBtnInCal();">
+                                <option>Выбор...</option>
+                                {% for tr_type in the_calendar.trans_type %}
+                                <option value="{{ tr_type.transacion_type_id }}">{{ tr_type.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group pb-2">
+                            <div class="input-group-prepend">
+                                <label for="oprGroup" class="input-group-text">Группа</label>
+                            </div>
+                            <select id="oprGroup" name="group" class="form-control" onchange="showGroups(this.value, this.name);enabledBtnInCal()">
+                                <!-- by AJAX request -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group pb-2">
+                            <div class="input-group-prepend">
+                                <label for="oprSubGroup" class="input-group-text">Подгруппа</label>
+                            </div>
+                            <select id="oprSubGroup" name="subgr" class="form-control" onchange="enabledBtnInCal();">
+                                <!-- by AJAX request -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 pb-2">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <label for="oprOwner" class="input-group-text">
+                                    <i class="fas fa-user"></i>
+                                </label>
+                            </div>
+                            <select name="owner" id="oprOwner" class="form-control" onfocus="enabledBtnInCal()">
+                                <option>Выбор...</option>
+                                {% for owner in the_calendar.owners %}
+                                <option value="{{ owner.user_id }}"> {{ owner.fname }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group pb-2">
+                            <div class="input-group-prepend">
+                                <label for="oprDate" class="input-group-text">
+                                    <i class="far fa-calendar-alt"></i>
+                                </label>
+                            </div>
+                            <input type="date" value="{{ the_calendar.first_date }}"  id="oprDate" name="date" class="form-control" onchange="enabledBtnInCal();" placeholder="Дата">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="input-group pb-2">
+                            <div class="input-group-prepend">
+                                <label for="oprSum" class="input-group-text">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </label>
+                            </div>
+                            <input type="text" id="oprSum" name="val" class="form-control" onchange="enabledBtnInCal();" placeholder="Сумма">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Отмена</button>
+                <button type="submit" class="btn btn-success" id="addTrnBtn">Добавить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
