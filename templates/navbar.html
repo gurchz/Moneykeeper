@@ -1,0 +1,24 @@
+<!-- navbar -->
+<nav class="shadow navbar navbar-dark navbar-expand-lg navbar-light bg-dark">
+    <a class="navbar-brand mr-0 mr-md-2" href="#">
+        <i class="fas fa-donate"></i>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="navbar-collapse collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item">
+                <a class="nav-link{% if request.path == url_for('dashboard') %} active {% endif %}" href="{{ url_for('dashboard') }}">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link{% if request.path == url_for('money_calendar') %} active {% endif %}" href="{{ url_for('money_calendar') }}">Календарь</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link{% if request.path == url_for('planning') %} active {% endif %}" href="{{ url_for('planning') }}">Планирование</a>
+            </li>
+        </ul>
+    </div>
+</nav>
