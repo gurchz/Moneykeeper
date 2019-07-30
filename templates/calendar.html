@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block body %}
+{% include "navbar.html" %}
+<!-- calendar -->
+<div class="month month-{% if the_calendar.transactions.sums.plus < the_calendar.transactions.sums.minus %}fail{%- else %}success{%- endif %}">
+	<div class="cal-panel row jumbotron shadow">
+		<div class="col-sm-8">
+            <form method="POST">
+			    <div id="dateSelGr" class="float-right input-group pl-3 m-3">
+				<div class="input-group-prepend shadow">
+					<label class="input-group-text">
+						<i class="far fa-calendar-alt"></i>
+					</label>
+				</div>
+				<div id="dateSelector" class="shadow">
+					<select name="month" class="custom-select">
+						{% for month in the_calendar.months %}
+						<option {% if month == the_calendar['new_date']['m'] %}selected{% endif %}>{{ month }}</option>
+						{% endfor %}
+					</select>
+					<select name="year" class="custom-select">
+						{% for year in the_calendar.years %}
+						<option {% if year == the_calendar['new_date']['y'] %}selected{% endif %}>{{ year }}</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div class="shadow input-group-append">
+					<button id="btnSubmt" class="btn btn-primary" type="submit">OK</button>
+				</div>
+			</div>
+            </form>
+		</div>
+		<div class="col-sm-4 mt-3">
+			<button id="addOpr" class="btn btn-primary float-right" data-toggle="modal" data-target=".add-operation-modal" onclick="enabledBtnInCal();" type="button"><i class="fas fa-plus"></i> Добавить операцию</button>
+			{% include 'modal_calendar.html' %}
+		</div>
+	</div>
+
+
+	<ul class="pt-3 mt-3">
+		<li class="prev">&#10094;</li>
+		<li class="next">&#10095;</li>
+		<li>{{ the_calendar['new_date']['m'] }}<br>
+		  <span style="font-size:18px">{{ the_calendar['new_date']['y'] }}</span>
+		</li>
+	</ul>
+	<div class="row">
+		<div class="plusmonth col-sm-6 text-center">
+			<p>Общий доход: <span class="">{{ the_calendar.transactions.sums.plus }}</span></p>
+		</div>
+		<div class="minusmonth col-sm-6 text-center">
+			<p>Общий расход: <span class="">{{ the_calendar.transactions.sums.minus }}</span></p>
+		</div>
+	</div>
+</div>
+
+<ul class="weekdays shadow">
+    {% for weekday in the_calendar.weekdays %}
+        <li>{{ weekday }}</li>
+    {% endfor %}
+</ul>
+
+<ul class="days shadow">
+    {% for day in the_calendar.days %}
+		<li data-toggle="modal" data-target="#dailyTrnModal" class="day-container" onclick="">
+			<p>{{ day.date.day }}</p>
+			<div class="daysums">
+				<p class="plus">{{ day.minus }}</p>
+				<p class="minus">{{ day.plus }}</p>
+			</div>
+		</li>
+    {% endfor %}
+	{% include "trns_a_day_modal.html" %}
+</ul>
+{% endblock %}
