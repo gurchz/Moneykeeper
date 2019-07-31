@@ -1,25 +1,7 @@
-function showGroups(val, nam) {
+function creatingXMLHttpReq(cmd, obj) {
     /* Creating AJAX-request */
 
 	var xhttp, params;
-	var nextid, previd;
-
-	// в случае если объект пустой
-	if (val == '') {
-		return;
-	}
-
-    // define next necessary element
-	switch(nam) {
-	    case 'trtype':
-	        nextid = 'oprGroup';
-	        previd = 'oprSubGroup';
-	        break;
-	    case 'group':
-	        nextid = 'oprSubGroup'
-	        previd = undefined;
-	        break;
-	}
 
 	// создать объект XMLHttpRequest
 	xhttp = new XMLHttpRequest
@@ -30,17 +12,58 @@ function showGroups(val, nam) {
 			} catch(e) {
 			    alert('Некорректный ответ')
 			}
-			showItems(itms, nextid, previd);
+			switch(cmd) {
+			    case 'show_groups':
+			        showGroups(itms, obj.value, obj.name);
+			        break;
+			    case 'show_trns':
+			        showTrns(itms);
+			        break;
+			}
 		}
 	};
 
 	// собрать имя формы и значение
-	params = nam.concat('=',val);
+	switch(cmd) {
+	    case 'show_groups':
+	        if (obj.value == "") {return;};
+	        params = obj.name.concat('=', obj.value);
+	        break;
+	    case 'show_trns':
+	        var d = obj.firstElementChild.innerText,
+	            m = document.getElementById('trn_month').innerText,
+	            y = document.getElementById('trn_year').innerText;
+	        params = 'trn_day='.concat(d);
+	        var idsOfEls = ['trn_month', 'trn_year'];
+	        idsOfEls.forEach(function(idOfEl) {
+	            var objById = document.getElementById(idOfEl);
+	            params = params.concat('&', objById.id, '=', objById.innerText);
+	        });
+	        document.getElementById('trnDate').innerHTML = d.concat(' ', m.toLowerCase(), ' ', y);
+	        break;
+	};
 	console.log(params);
 
 	// отправить форму
 	xhttp.open("GET", "/show?".concat(params));
 	xhttp.send();
+}
+
+function showGroups(items, val, nam) {
+	var nextid, previd;
+
+    // define next necessary element
+	switch(nam) {
+	    case 'trtype':
+	        nextid = 'oprGroup';
+	        previd = 'oprSubGroup';
+	        break;
+	    case 'group':
+	        nextid = 'oprSubGroup';
+	        previd = undefined;
+	        break;
+	}
+	showItems(items, nextid, previd);
 }
 
 function showItems(arr, sel_id, prev_id) {
@@ -92,3 +115,31 @@ function enabledBtnInCal() {
         btn.disabled = true;
     };
 }
+
+function showTrns(itms) {
+    var tbl = document.getElementById('trnTable');
+
+    // let's clear table
+    tbl.innerText = '';
+
+    // lets create tbody
+    var tbd = document.createElement('tbody');
+
+    // let's create tr
+    itms.forEach(function(r){
+        var rbr = document.createElement('tr');
+        // let's create td
+        r.forEach (function(c) {
+            var rbc = document.createElement('td');
+            rbc.innerText = c;
+            rbr.appendChild(rbc);
+        });
+        tbd.appendChild(rbr);
+    });
+
+    // insert data into table
+    tbl.appendChild(tbd);
+
+    // show modal
+    $('#dailyTrnModal').modal('show');
+};
