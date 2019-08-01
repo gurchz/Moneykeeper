@@ -7,6 +7,14 @@ ul {list-style-type: none;}
   text-align: center;
 }
 
+.prev, .next {
+    color: white;
+}
+
+.prev:hover, .next:hover {
+    text-decoration: none;
+    color: #ddd;
+}
 .month-success {background: #53c68c;}
 
 .month-fail {background: #e62e00;}
@@ -32,6 +40,8 @@ ul {list-style-type: none;}
 }
 
 .day-container {cursor:pointer;}
+
+.day-disabled {background: #ddd;}
 
 .month .prev {
   float: left;
