@@ -39,8 +39,8 @@
 
 
 	<ul class="pt-3 mt-3">
-		<li class="prev">&#10094;</li>
-		<li class="next">&#10095;</li>
+        <li><a class="prev" href="{{url_for('money_calendar', date_change=the_calendar.previous_month)}}">&#10094;</a></li>
+        <li><a class="next" href="{{url_for('money_calendar', date_change=the_calendar.next_month)}}">&#10095;</a></li>
         <li><span id="trn_month">{{ the_calendar['new_date']['m'] }}</span><br>
 		  <span id="trn_year" style="font-size:18px">{{ the_calendar['new_date']['y'] }}</span>
 		</li>
