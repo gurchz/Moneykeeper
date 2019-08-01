@@ -41,8 +41,8 @@
 	<ul class="pt-3 mt-3">
 		<li class="prev">&#10094;</li>
 		<li class="next">&#10095;</li>
-		<li>{{ the_calendar['new_date']['m'] }}<br>
-		  <span style="font-size:18px">{{ the_calendar['new_date']['y'] }}</span>
+        <li><span id="trn_month">{{ the_calendar['new_date']['m'] }}</span><br>
+		  <span id="trn_year" style="font-size:18px">{{ the_calendar['new_date']['y'] }}</span>
 		</li>
 	</ul>
 	<div class="row">
@@ -63,13 +63,17 @@
 
 <ul class="days shadow">
     {% for day in the_calendar.days %}
-		<li data-toggle="modal" data-target="#dailyTrnModal" class="day-container" onclick="">
-			<p>{{ day.date.day }}</p>
-			<div class="daysums">
-				<p class="plus">{{ day.minus }}</p>
-				<p class="minus">{{ day.plus }}</p>
-			</div>
-		</li>
+		{% if day.date != 0 %}
+			<li data-toggle="modal" class="day-container" onclick="creatingXMLHttpReq('show_trns', this)">
+				<p>{{ day.date }}</p>
+				<div class="daysums">
+					<p class="plus">{{ day.minus }}</p>
+					<p class="minus">{{ day.plus }}</p>
+				</div>
+			</li>
+		{% else %}
+			<li class="day-disabled"></li>
+		{% endif %}
     {% endfor %}
 	{% include "trns_a_day_modal.html" %}
 </ul>
