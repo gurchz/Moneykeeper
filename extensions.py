@@ -20,7 +20,7 @@ months_dict = {
 
 def get_month(month_name: str) -> int:
     try:
-        find_num = months_dict[month_name]
+        find_num = months_dict[month_name.lower()]
         return find_num
     except KeyError:
         raise MonthFindError
