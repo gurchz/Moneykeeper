@@ -1,5 +1,53 @@
+import datetime
+import calendar
+
+
 class MonthFindError(KeyError):
     pass
+
+
+class DatesForCalendarCreation:
+    """For getting changed dates for calendar"""
+    def __init__(self, cal_year, cal_month):
+        self.cal_month = cal_month
+        self.cal_year = cal_year
+
+    def __setattr__(self, key, value):
+        try:
+            if key == 'cal_month':
+                datetime.date(2015, value, 1)
+            elif key == 'cal_year':
+                datetime.date(value, 1, 1)
+            elif key == 'prev_parameter' or key == 'last_parameter':
+                if type(key) != 'str':
+                    raise AttributeError('Invalid next or prev parameter. It must be \'str\'')
+            else:
+                raise AttributeError('Only month and year maybe inited')
+        except TypeError and ValueError:
+            raise AttributeError('Bad parameters for date')
+        self.__dict__[key] = value
+
+    def f_day(self):
+        return datetime.date(self.cal_year, self.cal_month, 1)
+
+    def l_day(self):
+        return datetime.date(self.cal_year,
+                             self.cal_month,
+                             calendar.monthrange(self.cal_month, self.cal_month)[1])
+
+    def prev_date(self):
+        new_date = self.f_day() - datetime.timedelta(days=1)
+        return self.__change_date(new_date.month, new_date.year)
+
+    def next_date(self):
+        new_date = self.l_day() + datetime.timedelta(days=1)
+        return self.__change_date(new_date.month, new_date.year)
+
+    def __change_date(self, new_month, new_year):
+        self.cal_month, self.cal_year = [new_month, new_year]
+        return self.cal_month, self.cal_year
+
+
 
 
 months_dict = {
