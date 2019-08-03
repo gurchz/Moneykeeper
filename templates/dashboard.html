@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block head %}
+<script src="../static/chartjs/Chart.js"></script>
+{% endblock %}
+
+{% block body %}
+{% include "navbar.html" %}
+<div class="container">
+	<div class="row flex-xl-nowrap py-md-3">
+		<div class="col-md-6">
+			<div>
+				<p class="text-center">Диаграмма</p>
+				<div class="row">
+					<div class="col-md-8">
+						<p class="border" style="height: 150px">Рисунок</p>
+					</div>
+					<div class="col-md-4">
+						<p>Заработано</p>
+						<p>Потрачено</p>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-6">
+						<p class="border" style="height: 150px">Рисунок</p>
+					</div>
+					<div class="col-md-6">
+						<p class="border" style="height: 150px">Рисунок</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="border text-center">
+				<p>Доходы</p>
+				<p>1</p>
+				<p>2</p>
+				<p>3</p>
+			</div>
+		</div>
+		<div class="col-md-3 text-center">
+			<div class="border">
+				<p>Расходы</p>
+				<p>1</p>
+				<p>2</p>
+				<p>3</p>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6">
+			<div class="border">
+				<p>Топ 10</p>
+				<p>1</p>
+				<p>2</p>
+				<p>1</p>
+				<p>2</p>
+				<p>1</p>
+				<p>2</p>
+				<p>1</p>
+				<p>2</p>
+				<p>1</p>
+				<p>2</p>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<p class="border" style="height: 350px">Управление сберсчетом</p>
+		</div>
+	</div>
+</div>
+{% endblock %}
