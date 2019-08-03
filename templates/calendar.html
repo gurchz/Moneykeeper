@@ -6,7 +6,7 @@
 <div class="month month-{% if the_calendar.transactions.sums.plus < the_calendar.transactions.sums.minus %}fail{%- else %}success{%- endif %}">
 	<div class="cal-panel row jumbotron shadow">
 		<div class="col-sm-8">
-            <form method="POST">
+            <form method="GET">
 			    <div id="dateSelGr" class="float-right input-group pl-3 m-3">
 				<div class="input-group-prepend shadow">
 					<label class="input-group-text">
