@@ -28,7 +28,18 @@ def dashboard() -> 'html':
 def money_calendar() -> 'html':
     # when data is posted
     if request.method == 'POST':
-        return add_trn
+        """For adding new transactions"""
+        try:
+            add_trn_in_db(request.form['owner'], request.form['trtype'], request.form['subgr'],
+                          val=request.form['val'], d=request.form['date'])
+        except SQLError:
+            flash('Error in SQL-code', 'danger')
+        except DateError:
+            flash('Error in date', 'danger')
+        else:
+            flash('Data was added successfully', 'success')
+        finally:
+            return redirect(url_for('money_calendar'))
 
     # When new date was chosen by form
     if request.args.get('month') is not None and request.args.get('year') is not None:
@@ -68,21 +79,6 @@ def money_calendar() -> 'html':
     cal['previous_month'], cal['next_month'] = [cal_pars_prev, cal_pars_next]
 
     return render_template('calendar.html', the_title='Календарь', the_calendar=cal)
-
-
-def add_trn():
-    """For adding new transactions"""
-    try:
-        add_trn_in_db(request.form['owner'], request.form['trtype'], request.form['subgr'],
-                      val=request.form['val'], d=request.form['date'])
-    except SQLError:
-        flash('Error in SQL-code', 'danger')
-    except DateError:
-        flash('Error in date', 'danger')
-    else:
-        flash('Data was added successfully', 'success')
-    finally:
-        return redirect(url_for('money_calendar'))
 
 
 @app.route('/show')
