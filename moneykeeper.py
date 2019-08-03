@@ -33,8 +33,8 @@ def money_calendar() -> 'html':
     # When new date was chosen by form
     if request.args.get('month') is not None and request.args.get('year') is not None:
         try:
-            app.config['MONTH_YEAR'] = {'m': get_month(request.form['month'].lower()),
-                                        'y': int(request.form['year'])}
+            app.config['MONTH_YEAR'] = {'m': get_month(request.args.get('month').lower()),
+                                        'y': int(request.args.get('year'))}
         except MonthFindError and ValueError and KeyError:
             flash('Error In Date', 'danger')
 

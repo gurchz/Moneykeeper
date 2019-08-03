@@ -18,9 +18,6 @@ class DatesForCalendarCreation:
                 datetime.date(2015, value, 1)
             elif key == 'cal_year':
                 datetime.date(value, 1, 1)
-            elif key == 'prev_parameter' or key == 'last_parameter':
-                if type(key) != 'str':
-                    raise AttributeError('Invalid next or prev parameter. It must be \'str\'')
             else:
                 raise AttributeError('Only month and year maybe inited')
         except TypeError and ValueError:
@@ -46,8 +43,6 @@ class DatesForCalendarCreation:
     def __change_date(self, new_month, new_year):
         self.cal_month, self.cal_year = [new_month, new_year]
         return self.cal_month, self.cal_year
-
-
 
 
 months_dict = {
