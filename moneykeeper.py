@@ -5,7 +5,8 @@ from extensions import (get_month, get_rus_months, get_rus_month,
                         get_money, MonthFindError, DatesForCalendarCreation)
 from db import (db_session, show_month_dbt_crt, add_trn_in_db,
                 get_trans_type, get_owner, SQLError, DateError,
-                get_transactions_per_day)
+                get_transactions_per_day, get_month_values, show_sums,
+                get_top, get_last_months_purchase)
 import datetime
 
 app = Flask(__name__)
@@ -21,7 +22,15 @@ def show_main_page() -> 'html':
 
 @app.route('/dashboard')
 def dashboard() -> 'html':
-    return render_template('dashboard.html', the_title='Dashboard')
+    d_date = DatesForCalendarCreation(app.config['MONTH_YEAR']['y'], app.config['MONTH_YEAR']['m'])
+    dash = dict()
+    fday, lday = (d_date.f_day(), d_date.l_day())
+    dash['month_incomes'] = get_month_values(fday, lday, 1)
+    dash['month_costs'] = get_month_values(fday, lday, 2)
+    dash['month_totals'] = {'incomes': show_sums(fday, lday, 1),
+                            'costs': show_sums(fday, lday, 2)}
+    dash['top_purchase'] = get_top(fday, lday)
+    return render_template('dashboard.html', the_title='Dashboard', the_dash=dash)
 
 
 @app.route('/money_calendar', methods=['GET', 'POST'])
@@ -49,7 +58,7 @@ def money_calendar() -> 'html':
         except MonthFindError and ValueError and KeyError:
             flash('Error In Date', 'danger')
 
-    # Creating calendar object with dates and calculating nessecary date values
+    # Creating calendar object with dates and calculating necessary date values
     cal_obj = calendar.Calendar(0)
     cal_pars_prev, cal_pars_next = ['prev', 'next']
     dates = DatesForCalendarCreation(app.config['MONTH_YEAR']['y'], app.config['MONTH_YEAR']['m'])
@@ -89,6 +98,7 @@ def show() -> 'json':
     d_params = {'d': request.args.get('trn_day'),
                 'm': request.args.get('trn_month'),
                 'y': request.args.get('trn_year')}
+    last_m_pars = request.args.get('show_months')
 
     # check get-request-arguments
     db_res = 'Parameters are not identified'
@@ -98,6 +108,15 @@ def show() -> 'json':
     elif gr_id is not None:
         db_res = db_session.execute('''SELECT purchase_id, name FROM purchase
                             WHERE group_goods_id = :w1''', {'w1': gr_id}).fetchall()
+
+    elif last_m_pars is not None:
+        if not json.loads(last_m_pars):
+            return
+        last_m_pur = get_last_months_purchase(datepar='2015-08-01')
+        db_res = {k: [itm[k] if itm[k] is not None else 0 for itm in last_m_pur]
+                  for rw in last_m_pur for k in rw.keys()}
+        db_res['month'] = [get_rus_month(m) for m in db_res['month']]
+
     elif None not in d_params.values():
         try:
             d_params['m'] = get_month(d_params['m'])
@@ -108,7 +127,10 @@ def show() -> 'json':
             pass
 
     # we need list-type for returning the json-answer
-    db_res_for_json = [list(line) for line in db_res]
+    if type(db_res) == list:
+        db_res_for_json = [list(line) for line in db_res]
+    elif type(db_res) == dict:
+        db_res_for_json = db_res
 
     # json-answer
     return json.dumps(db_res_for_json, sort_keys=True, ensure_ascii=False)

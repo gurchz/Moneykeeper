@@ -9,62 +9,132 @@
 	<div class="row flex-xl-nowrap py-md-3">
 		<div class="col-md-6">
 			<div>
-				<p class="text-center">Диаграмма</p>
-				<div class="row">
-					<div class="col-md-8">
-						<p class="border" style="height: 150px">Рисунок</p>
-					</div>
-					<div class="col-md-4">
-						<p>Заработано</p>
-						<p>Потрачено</p>
+				<div class="row shadow">
+					<canvas id="incomeCostsDiagram" class="col-md-8 mb-4">
+						<p class="border">Рисунок</p>
+					</canvas>
+					<div class="col-md-4 text-center mt-3">
+						<p>Заработано <span id="total_income">{{ the_dash.month_totals.incomes }}</span></p>
+						<p>Потрачено <span id="total_cost">{{ the_dash.month_totals.costs }}</span></p>
+						<p>Баланс <span>0</span></p>
 					</div>
 				</div>
-				<div class="row">
-					<div class="col-md-6">
-						<p class="border" style="height: 150px">Рисунок</p>
-					</div>
-					<div class="col-md-6">
-						<p class="border" style="height: 150px">Рисунок</p>
-					</div>
+				<div class="row shadow mt-4">
+					<canvas id="yearDiagram" class="col-md-6">
+						<p class="border">Рисунок</p>
+					</canvas>
+					<canvas id="costsDiagram" class="col-md-6">
+						<p class="border">Рисунок</p>
+					</canvas>
 				</div>
 			</div>
 		</div>
 		<div class="col-md-3">
-			<div class="border text-center">
-				<p>Доходы</p>
-				<p>1</p>
-				<p>2</p>
-				<p>3</p>
+			<div class="border text-center shadow mb-4">
+				<p class="pt-2">Доходы</p>
+				<table class="table table-hover">
+					<tbody>
+						{% for income in the_dash.month_incomes %}
+						<tr>
+							<td>{{ income.g_name }}</td>
+							<td>{{ income.sum_value }}</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
 			</div>
 		</div>
-		<div class="col-md-3 text-center">
-			<div class="border">
-				<p>Расходы</p>
-				<p>1</p>
-				<p>2</p>
-				<p>3</p>
+		<div class="col-md-3 text-center mb-4">
+			<div class="border shadow">
+				<p class="pt-2">Расходы</p>
+				<table class="table table-hover overflow-auto">
+					<tbody>
+						{% for income in the_dash.month_costs %}
+						<tr>
+							<td>{{ income.g_name }}</td>
+							<td>{{ income.sum_value }}</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
 			</div>
 		</div>
 	</div>
-	<div class="row">
-		<div class="col-md-6">
-			<div class="border">
-				<p>Топ 10</p>
-				<p>1</p>
-				<p>2</p>
-				<p>1</p>
-				<p>2</p>
-				<p>1</p>
-				<p>2</p>
-				<p>1</p>
-				<p>2</p>
-				<p>1</p>
-				<p>2</p>
+	<div class="row mt-5 mb-5">
+		<div class="col-md-6 overflow-auto">
+			<div class="border shadow">
+				<p class="pt-2 text-center">Топ 10 покупок</p>
+				<table class="table table-hover">
+					{% for top10 in the_dash.top_purchase %}
+					<tr>
+						<td>{{ top10.p_name }}</td>
+						<td>{{ top10.val }}</td>
+					</tr>
+					{% endfor %}
+				</table>
 			</div>
 		</div>
 		<div class="col-md-6">
-			<p class="border" style="height: 350px">Управление сберсчетом</p>
+			<div class="border shadow">
+				<p class="text-center pt-2">Управление сберсчетом</p>
+			</div>
 		</div>
 	</div>
 </div>
+<script type="text/javascript">
+	// Income/costs diagram
+	var ctx = document.getElementById('incomeCostsDiagram');
+	new Chart(ctx,{
+		"type":"doughnut",
+		"data":
+			{"labels":["Расход", "Доход"],
+			 "datasets":[{"label":"Costs and Incomes",
+						  "data":[{{ the_dash.month_totals.costs }},
+						 {{ the_dash.month_totals.incomes }}],
+						  "backgroundColor":["rgb(255, 99, 132)",
+											 "rgb(54, 162, 235)"]}]}});
+
+	// Year diagram
+	creatingXMLHttpReq('show_last_months', this);
+	function crCostMonthDiagr(respText) {
+		new Chart(document.getElementById("yearDiagram"),{
+		"type":"line",
+		"data":{"labels":
+			respText.month,
+			 "datasets":[{"label":"Расходы",
+						  "data":respText.incomes,
+						  "fill":false,"borderColor":"rgb(54, 162, 235)",
+						  "lineTension":0.5},
+						  {"label":"Доходы",
+						   "data":respText.costs,
+						   "fill":false,"borderColor":"rgb(75, 192, 192)",
+						   "lineTension":0.5}]},
+		"options":{}});
+	}
+
+	//costs diagram
+	new Chart(document.getElementById("costsDiagram"),
+		{"type":"bar",
+		"data":
+			{"labels":["January","February","March","April","May","June","July"],
+			"datasets":[
+				{"label":"Тестовый набор",
+				 "data":[65,59,80,81,56,55,40],
+				 "fill":false,"backgroundColor":["rgba(255, 99, 132, 0.2)",
+				 								 "rgba(255, 159, 64, 0.2)",
+				 								 "rgba(255, 205, 86, 0.2)",
+				 								 "rgba(75, 192, 192, 0.2)",
+				 								 "rgba(54, 162, 235, 0.2)",
+				 								 "rgba(153, 102, 255, 0.2)",
+				 								 "rgba(201, 203, 207, 0.2)"],
+				 				"borderColor":["rgb(255, 99, 132)",
+				 							   "rgb(255, 159, 64)",
+				 							   "rgb(255, 205, 86)",
+				 							   "rgb(75, 192, 192)",
+				 							   "rgb(54, 162, 235)",
+				 							   "rgb(153, 102, 255)",
+				 							   "rgb(201, 203, 207)"],
+				 							   "borderWidth":1}]},
+			"options":{"scales":{"yAxes":[{"ticks":{"beginAtZero":true}}]}}});
+</script>
 {% endblock %}

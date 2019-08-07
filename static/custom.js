@@ -19,6 +19,9 @@ function creatingXMLHttpReq(cmd, obj) {
 			    case 'show_trns':
 			        showTrns(itms);
 			        break;
+			    case 'show_last_months':
+			        crCostMonthDiagr(itms);
+
 			}
 		}
 	};
@@ -41,6 +44,8 @@ function creatingXMLHttpReq(cmd, obj) {
 	        });
 	        document.getElementById('trnDate').innerHTML = d.concat(' ', m.toLowerCase(), ' ', y);
 	        break;
+	    case 'show_last_months':
+	        params='show_months=true';
 	};
 	console.log(params);
 
@@ -97,17 +102,25 @@ function enabledBtnInCal() {
     /* Check when submit button should be enabled */
 
     var btn = document.getElementById('addTrnBtn');
-    var valStatus = false;
+    var valStatus = true;
 
     els_ids = ['oprType', 'oprGroup', 'oprSubGroup', 'oprOwner', 'oprSum', 'oprDate'];
 
-    els_ids.forEach(function(el_id) {
-        if (document.getElementById(el_id).value == '') {
-            valStatus = false;
-            return;
+    try {
+        var NoValidation = {};
+        els_ids.forEach(function(el_id) {
+            var el_val = document.getElementById(el_id).value
+            if (el_val == '' || el_val == 'Выбор...') {
+                throw NoValidation;
+            }
+        });
+    } catch(e) {
+        if (e !== NoValidation) {
+            throw e
+        } else {
+            valStatus = false
         }
-        valStatus = true;
-    });
+    }
 
     if (valStatus) {
         btn.disabled = false;
@@ -143,3 +156,10 @@ function showTrns(itms) {
     // show modal
     $('#dailyTrnModal').modal('show');
 };
+
+function showModalByHiding(id_for_hide, id_for_show) {
+    $(id_for_hide).modal('hide');
+    d = new Date();
+    d.setDate()
+    $(id_for_show).modal('show');
+}

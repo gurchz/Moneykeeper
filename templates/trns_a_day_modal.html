@@ -1,0 +1,20 @@
+<div class="modal fade" id="dailyTrnModal" tabindex="-1" role="dialog" aria-labelledby="dailyTrnModalHeader" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title" id="dailyTrnModalHeader">Транзакции на <span id="trnDate"></span></h4>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close" >
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<table id="trnTable" class="table table-hover">
+					<!-- AJSX request -->
+				</table>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-primary" type="button" id="btnAddFromTrnModal" onclick="showModalByHiding('#dailyTrnModal', '#addTrnModal')">Добавить что-то</button>
+			</div>
+		</div>
+	</div>
+</div>
