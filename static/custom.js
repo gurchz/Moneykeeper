@@ -159,7 +159,5 @@ function showTrns(itms) {
 
 function showModalByHiding(id_for_hide, id_for_show) {
     $(id_for_hide).modal('hide');
-    d = new Date();
-    d.setDate()
     $(id_for_show).modal('show');
 }
