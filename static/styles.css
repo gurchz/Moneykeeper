@@ -135,19 +135,19 @@ ul {list-style-type: none;}
 @media screen and (max-width:720px) {
   .weekdays li, .days li {width: 13.1%;}
   .plus, .minus {font-size: 10px;}
-  #addOpr {width: 100%;}
+  #addOpr, #addSber {width: 100%;}
   .transact-table {font-size: 0.75em;}
 }
 
 @media screen and (max-width: 420px) {
   .weekdays li, .days li {width: 12.5%;}
   .days li .active {padding: 2px;}
-  #addOpr {width: 100%;}
+  #addOpr, #addSber {width: 100%;}
   .transact-table {font-size: 0.75em;}
 }
 
 @media screen and (max-width: 290px) {
   .weekdays li, .days li {width: 12.2%;}
-  #addOpr {width: 100%;}
+  #addOpr, #addSber {width: 100%;}
   .transact-table {font-size: 0.75em;}
 }
