@@ -14,12 +14,12 @@
 						<p class="border">Рисунок</p>
 					</canvas>
 					<div class="col-md-4 text-center mt-3">
-						<p>Заработано <span id="total_income">{{ the_dash.month_totals.incomes }}</span></p>
-						<p>Потрачено <span id="total_cost">{{ the_dash.month_totals.costs }}</span></p>
-						<p>Баланс <span>0</span></p>
+						<p>Заработано: <span id="total_income">{{ the_dash.month_totals.incomes }}</span></p>
+						<p>Потрачено: <span id="total_cost">{{ the_dash.month_totals.costs }}</span></p>
+						<p>Баланс: <span id="balTotal">{{ the_dash.cur_balance }}</span></p>
 					</div>
 				</div>
-				<div class="row shadow mt-4">
+				<div class="row shadow mt-4 mb-4">
 					<canvas id="yearDiagram" class="col-md-6">
 						<p class="border">Рисунок</p>
 					</canvas>
@@ -44,7 +44,7 @@
 				</table>
 			</div>
 		</div>
-		<div class="col-md-3 text-center mb-4">
+		<div class="col-md-3 text-center mb-2">
 			<div class="border shadow">
 				<p class="pt-2">Расходы</p>
 				<table class="table table-hover overflow-auto">
@@ -61,9 +61,9 @@
 		</div>
 	</div>
 	<div class="row mt-5 mb-5">
-		<div class="col-md-6 overflow-auto">
-			<div class="border shadow">
-				<p class="pt-2 text-center">Топ 10 покупок</p>
+		<div class="col-md-6">
+			<div class="border shadow p-4">
+				<p class="text-center">Топ 10 покупок</p>
 				<table class="table table-hover">
 					{% for top10 in the_dash.top_purchase %}
 					<tr>
@@ -75,8 +75,27 @@
 			</div>
 		</div>
 		<div class="col-md-6">
-			<div class="border shadow">
-				<p class="text-center pt-2">Управление сберсчетом</p>
+			<div class="border shadow p-4">
+				<p class="text-center">Управление сберсчетом</p>
+				<p>Баланс: <span id="balSber">{{the_dash.sber_balance}}</span></p>
+				<p class="text-center mt-1">Недавние операции</p>
+				<table id="tblSber" class="table table-hover">
+					<tr>
+						<td>Пополнение</td>
+						<td>20 марта 2019</td>
+						<td>2000</td>
+					</tr>
+					<tr>
+						<td>Расход</td>
+						<td>21 марта 2019</td>
+						<td>1000</td>
+						<td>На билеты</td>
+					</tr>
+				</table>
+				<button id="addSber" type="button" class="btn btn-primary rounded-pill shadow pl-3 pr-3" data-target="#sberManage" onclick="creatingXMLHttpReq('show_accounts',this.getAttribute('data-target'))">
+					<i class="fas fa-donate"></i> Добавить операцию
+				</button>
+				{% include 'sber_modal.html' %}
 			</div>
 		</div>
 	</div>
@@ -101,11 +120,11 @@
 		"type":"line",
 		"data":{"labels":
 			respText.month,
-			 "datasets":[{"label":"Расходы",
+			 "datasets":[{"label":"Доходы",
 						  "data":respText.incomes,
 						  "fill":false,"borderColor":"rgb(54, 162, 235)",
 						  "lineTension":0.5},
-						  {"label":"Доходы",
+						  {"label":"Расходы",
 						   "data":respText.costs,
 						   "fill":false,"borderColor":"rgb(75, 192, 192)",
 						   "lineTension":0.5}]},
