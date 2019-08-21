@@ -43,33 +43,6 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `moneykeeper`.`planning_parameter`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `moneykeeper`.`planning_parameter` (
-  `pp_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `pp_val` DOUBLE UNSIGNED NOT NULL,
-  `date_from` DATE NOT NULL,
-  `date_to` DATE NOT NULL,
-  `user_user_id` TINYINT(3) UNSIGNED NOT NULL,
-  `transacion_type_id` INT NOT NULL,
-  `name` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`pp_id`),
-  INDEX `fk_revenue_user1_idx` (`user_user_id` ASC) VISIBLE,
-  INDEX `fk_planning_parameter_transacion_type1_idx` (`transacion_type_id` ASC) VISIBLE,
-  CONSTRAINT `fk_revenue_user1`
-    FOREIGN KEY (`user_user_id`)
-    REFERENCES `moneykeeper`.`user` (`user_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_planning_parameter_transacion_type1`
-    FOREIGN KEY (`transacion_type_id`)
-    REFERENCES `moneykeeper`.`transacion_type` (`transacion_type_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `moneykeeper`.`group_goods`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `moneykeeper`.`group_goods` (
@@ -87,17 +60,62 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `moneykeeper`.`planning_group`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `moneykeeper`.`planning_group` (
+  `pl_gr_id` CHAR(3) NOT NULL,
+  `name` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`pl_gr_id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `moneykeeper`.`purchase`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `moneykeeper`.`purchase` (
   `purchase_id` INT NOT NULL,
   `name` VARCHAR(45) NOT NULL,
   `group_goods_id` INT UNSIGNED NOT NULL,
+  `planning_group_pl_gr_id` CHAR(3) NOT NULL,
   PRIMARY KEY (`purchase_id`),
   INDEX `fk_purchase_group_goods1_idx` (`group_goods_id` ASC) VISIBLE,
+  INDEX `fk_purchase_planning_group1_idx` (`planning_group_pl_gr_id` ASC) VISIBLE,
   CONSTRAINT `fk_purchase_group_goods1`
     FOREIGN KEY (`group_goods_id`)
     REFERENCES `moneykeeper`.`group_goods` (`group_goods_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_purchase_planning_group1`
+    FOREIGN KEY (`planning_group_pl_gr_id`)
+    REFERENCES `moneykeeper`.`planning_group` (`pl_gr_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `moneykeeper`.`planning_parameter`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `moneykeeper`.`planning_parameter` (
+  `pp_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `pp_val` DOUBLE UNSIGNED NOT NULL,
+  `date_from` DATE NOT NULL,
+  `date_to` DATE NOT NULL,
+  `user_id` TINYINT(3) UNSIGNED NOT NULL,
+  `planning_date` DATE NULL,
+  `planning_last_upd` DATE NOT NULL,
+  `purchase_id` INT NOT NULL,
+  PRIMARY KEY (`pp_id`),
+  INDEX `fk_revenue_user1_idx` (`user_id` ASC) VISIBLE,
+  INDEX `fk_planning_parameter_purchase1_idx` (`purchase_id` ASC) VISIBLE,
+  CONSTRAINT `fk_revenue_user1`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `moneykeeper`.`user` (`user_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_planning_parameter_purchase1`
+    FOREIGN KEY (`purchase_id`)
+    REFERENCES `moneykeeper`.`purchase` (`purchase_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -153,6 +171,19 @@ CREATE TABLE IF NOT EXISTS `moneykeeper`.`transaction` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+USE `moneykeeper`;
+
+DELIMITER $$
+USE `moneykeeper`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `moneykeeper`.`add_upd_plan_date` BEFORE UPDATE ON `planning_parameter` FOR EACH ROW
+BEGIN
+	IF NEW.pp_val <> OLD.pp_val THEN
+		SET NEW.planning_last_upd = curdate();
+    END IF;
+END;$$
+
+
+DELIMITER ;
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
