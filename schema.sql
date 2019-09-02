@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS `moneykeeper`.`planning_parameter` (
   `date_to` DATE NOT NULL,
   `user_id` TINYINT(3) UNSIGNED NOT NULL,
   `planning_date` DATE NULL,
-  `planning_last_upd` DATE NOT NULL,
+  `planning_last_upd` DATE NULL,
   `purchase_id` INT NOT NULL,
   PRIMARY KEY (`pp_id`),
   INDEX `fk_revenue_user1_idx` (`user_id` ASC) VISIBLE,
@@ -171,6 +171,101 @@ CREATE TABLE IF NOT EXISTS `moneykeeper`.`transaction` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+USE `moneykeeper` ;
+
+-- -----------------------------------------------------
+-- procedure upd_plan
+-- -----------------------------------------------------
+
+DELIMITER $$
+USE `moneykeeper`$$
+CREATE PROCEDURE upd_plan(pur_id INTEGER, new_val DOUBLE)
+
+BEGIN
+	SELECT pp_val FROM purchase WHERE purchase_id = pur_id;
+END;$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------
+-- procedure edit_planning_parameter
+-- -----------------------------------------------------
+
+DELIMITER $$
+USE `moneykeeper`$$
+CREATE PROCEDURE `edit_planning_parameter`(p_val DOUBLE, p_d_from DATE, pur INTEGER,
+										pl_date DATE, usr INTEGER)
+BEGIN
+    DECLARE last_val DOUBLE;
+    DECLARE last_date_to, last_date_from DATE;
+    DECLARE last_pp_id INTEGER;
+    
+    # Выбор последней даты и значения по purchase_id
+	SELECT pp_val, date_from, date_to, pp_id 
+    INTO last_val, last_date_from, last_date_to, last_pp_id
+    FROM planning_parameter 
+	WHERE purchase_id = pur ORDER BY date_to DESC LIMIT 1;
+    
+    IF last_val IS NULL
+	THEN
+		# Если запись новая - проверить запись в таблице и добавить
+		BEGIN
+			DECLARE new_p_id INTEGER;		
+			SELECT purchase_id INTO new_p_id FROM purchase WHERE purchase_id = pur;
+            IF new_p_id IS NOT NULL
+            THEN
+				CALL append_new_planpar(pur, p_d_from, p_val, pl_date, usr, DATE_ADD(p_d_from, INTERVAL 1 MONTH));
+			END IF;
+		END;
+	ELSE
+		# Если запись уже сущесвтует
+		BEGIN
+			DECLARE prev_last_date_to DATE;
+            SET prev_last_date_to = DATE_SUB(last_date_to, INTERVAL 1 MONTH);
+			CASE
+				# Запись устаревшая - добавить новую
+				WHEN last_date_to <= p_d_from AND last_val <> p_val THEN
+					CALL append_new_planpar(pur, last_date_to, p_val, pl_date, usr, DATE_ADD(p_d_from, INTERVAL 1 MONTH));
+				# Запись устаревшая, но значение такое же - обновить дату в таблице
+                WHEN last_date_to <= p_d_from AND last_val = p_val THEN
+					UPDATE planning_parameter
+                    SET date_to = DATE_ADD(p_d_from, INTERVAL 1 MONTH)
+                    WHERE pp_id = last_pp_id;
+				# Если последняя запись от предыдущего месяца - обновить таблицу и добавить строку
+				WHEN prev_last_date_to = p_d_from AND last_val <> p_val THEN
+					# Если запись спланирована более чем на месяц
+					IF prev_last_date_to <> last_date_from THEN
+						UPDATE planning_parameter
+						SET date_to = prev_last_date_to
+						WHERE pp_id = last_pp_id;
+                        CALL append_new_planpar(pur, prev_last_date_to, p_val, pl_date, usr, DATE_ADD(p_d_from, INTERVAL 1 MONTH));
+					# Если записи всего месяц
+                    ELSE
+						UPDATE planning_parameter
+                        SET pp_val = p_val
+                        WHERE pp_id = last_pp_id;
+					END IF;
+            END CASE;
+		END;
+	END IF;
+END$$
+
+DELIMITER ;
+
+-- -----------------------------------------------------
+-- procedure append_new_planpar
+-- -----------------------------------------------------
+
+DELIMITER $$
+USE `moneykeeper`$$
+CREATE PROCEDURE append_new_planpar(pur INTEGER, d_from DATE, 
+									p_val DOUBLE, pl_date DATE, usr INTEGER, p_d_to DATE)
+BEGIN
+	INSERT INTO planning_parameter (pp_val, date_from, date_to, user_id, planning_date, purchase_id)
+	VALUES (p_val, d_from, p_d_to, usr, pl_date, pur);
+END;$$
+
+DELIMITER ;
 USE `moneykeeper`;
 
 DELIMITER $$
