@@ -79,14 +79,14 @@
                                     <i class="fas fa-dollar-sign"></i>
                                 </label>
                             </div>
-                            <input type="text" id="oprSum" name="val" class="form-control" onchange="enabledBtnInCal();" placeholder="Сумма">
+                            <input type="text" id="oprSum" name="val" class="form-control" onchange="enabledBtnInCal();checkSumData(this.id);" placeholder="Сумма">
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal">Отмена</button>
-                <button type="submit" class="btn btn-success" id="addTrnBtn">Добавить</button>
+                <button type="button" class="btn btn-danger rounded-pill shadow pl-3 pr-3" data-dismiss="modal">Отмена</button>
+                <button type="submit" class="btn btn-success rounded-pill shadow pl-3 pr-3" id="addTrnBtn">Добавить</button>
             </div>
         </form>
     </div>

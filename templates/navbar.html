@@ -1,6 +1,6 @@
 <!-- navbar -->
 <nav class="shadow navbar navbar-dark navbar-expand-lg navbar-light bg-dark">
-    <a class="navbar-brand mr-0 mr-md-2" href="#">
+    <a id="currentParametersIcon" class="navbar-brand mr-0 mr-md-2" role="button" tabindex="0" data-toggle="popover">
         <i class="fas fa-donate"></i>
     </a>
 
@@ -17,8 +17,26 @@
                 <a class="nav-link{% if request.path == url_for('money_calendar') %} active {% endif %}" href="{{ url_for('money_calendar') }}">Календарь</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link{% if request.path == url_for('planning') %} active {% endif %}" href="{{ url_for('planning') }}">Планирование</a>
+                <a class="nav-link{% if request.path == url_for('planning') %} active {% endif %}" href="{{ url_for('planning') }}">Планирование <span class="badge badge-warning">В работе</span></a>
             </li>
         </ul>
+    </div>
+    <div class="d-none">
+        <div id="forPopover">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <i class="far fa-calendar"></i>                    
+                    <span class="badge badge-primary badge-pill">{{for_nav.date}}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <i class="fas fa-balance-scale-right"></i>
+                    <span id="navBal" class="badge badge-primary badge-pill">{{for_nav.balance}}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <i class="fas fa-piggy-bank"></i>
+                    <span id="navSberBal" class="badge badge-primary badge-pill">{{for_nav.sber_balance}}</span>
+                </li>
+            </ul>
+        </div>
     </div>
 </nav>

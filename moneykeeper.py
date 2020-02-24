@@ -2,11 +2,15 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 import json
 import calendar
 from extensions import (get_month, get_rus_months, get_rus_month,
-                        get_money, MonthFindError, DatesForCalendarCreation)
+                        get_money, MonthFindError, DatesForCalendarCreation, detect_general_parameters,
+                        get_field_props, JSONData)
+
 from db import (db_session, show_month_dbt_crt, add_trn_in_db,
                 get_trans_type, get_owner, SQLError, DateError,
                 get_transactions_per_day, get_month_values, show_sums,
-                get_top, get_last_months_purchase)
+                get_top, get_last_months_purchase, get_balance, get_accounts,
+                get_sber_balance, get_sber_transactions, get_planning_parameters,
+                get_planning_sums_by_user, get_planning_groups, update_planning_from_json)
 import datetime
 
 app = Flask(__name__)
@@ -20,7 +24,7 @@ def show_main_page() -> 'html':
     return render_template('main.html', the_title='Main page')
 
 
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['GET'])
 def dashboard() -> 'html':
     d_date = DatesForCalendarCreation(app.config['MONTH_YEAR']['y'], app.config['MONTH_YEAR']['m'])
     dash = dict()
@@ -30,7 +34,13 @@ def dashboard() -> 'html':
     dash['month_totals'] = {'incomes': show_sums(fday, lday, 1),
                             'costs': show_sums(fday, lday, 2)}
     dash['top_purchase'] = get_top(fday, lday)
-    return render_template('dashboard.html', the_title='Dashboard', the_dash=dash)
+    dash['cur_balance'] = get_balance()
+    dash['sber_balance'] = 100
+    return render_template('dashboard.html',
+                           the_title='Dashboard',
+                           the_dash=dash,
+                           for_nav=detect_general_parameters(app.config['MONTH_YEAR']['m'],
+                                                             app.config['MONTH_YEAR']['y']))
 
 
 @app.route('/money_calendar', methods=['GET', 'POST'])
@@ -45,6 +55,8 @@ def money_calendar() -> 'html':
             flash('Error in SQL-code', 'danger')
         except DateError:
             flash('Error in date', 'danger')
+        except Exception as e:
+            flash(str(e), 'danger')
         else:
             flash('Data was added successfully', 'success')
         finally:
@@ -87,7 +99,11 @@ def money_calendar() -> 'html':
     cal['owners'] = get_owner()
     cal['previous_month'], cal['next_month'] = [cal_pars_prev, cal_pars_next]
 
-    return render_template('calendar.html', the_title='Календарь', the_calendar=cal)
+    return render_template('calendar.html',
+                           the_title='Календарь',
+                           the_calendar=cal,
+                           for_nav=detect_general_parameters(app.config['MONTH_YEAR']['m'],
+                                                             app.config['MONTH_YEAR']['y']))
 
 
 @app.route('/show')
@@ -99,6 +115,7 @@ def show() -> 'json':
                 'm': request.args.get('trn_month'),
                 'y': request.args.get('trn_year')}
     last_m_pars = request.args.get('show_months')
+    show_acc = request.args.get('show_accounts')
 
     # check get-request-arguments
     db_res = 'Parameters are not identified'
@@ -112,10 +129,14 @@ def show() -> 'json':
     elif last_m_pars is not None:
         if not json.loads(last_m_pars):
             return
-        last_m_pur = get_last_months_purchase(datepar='2015-08-01')
+        app_date = datetime.date(app.config['MONTH_YEAR']['y'], app.config['MONTH_YEAR']['m'], 1)
+        last_m_pur = get_last_months_purchase(datepar=app_date)
         db_res = {k: [itm[k] if itm[k] is not None else 0 for itm in last_m_pur]
                   for rw in last_m_pur for k in rw.keys()}
-        db_res['month'] = [get_rus_month(m) for m in db_res['month']]
+        try:
+            db_res['month'] = [get_rus_month(m) for m in db_res['month']]
+        except KeyError:
+            db_res.setdefault('month', '')
 
     elif None not in d_params.values():
         try:
@@ -126,19 +147,95 @@ def show() -> 'json':
         except MonthFindError:
             pass
 
+    elif show_acc is not None:
+        if json.loads(show_acc):
+            db_res = get_accounts()
+
+    elif request.args.get('upd_sber_data') is not None:
+        if json.loads(request.args.get('upd_sber_data')):
+            m, y = [app.config['MONTH_YEAR']['m'], app.config['MONTH_YEAR']['y']]
+            db_res = {'bal': get_balance(m, y),
+                      'sber_bal': get_sber_balance(m, y),
+                      'sber_tbl': [{ky: val if ky != 'date' else str(val.day) + ' ' + get_rus_month(val.month) + ' ' + str(val.year)
+                                    for ky, val in line.items()} for line in get_sber_transactions(m, y)]}
+
+    elif request.args.get('show_users') is not None:
+        if json.loads(request.args.get('show_users')):
+            db_res = get_owner()
+
+    elif request.args.get('month_year') is not None:
+        if json.loads(request.args.get('month_year')):
+            db_res = {'month': app.config['MONTH_YEAR']['m'],
+                      'year': app.config['MONTH_YEAR']['y']}
+
+    elif request.args.get('show_planning') is not None and request.args.get('planning_group') is not None:
+        if json.loads(request.args.get('show_planning')):
+            d = datetime.date(app.config['MONTH_YEAR']['y'], app.config['MONTH_YEAR']['m'], 1)
+            planning_groups = {pl_gr_row['pl_gr_id']: pl_gr_row['name'] for pl_gr_row in get_planning_groups()}
+            par_plan_gr = request.args.get('planning_group')
+            if par_plan_gr not in planning_groups:
+                db_res = {'message': 'Не указана группа планирования'}
+            else:
+                db_res = {'title': planning_groups[par_plan_gr],
+                          'data': [{k: v for k, v in plan_par_row.items()}
+                                   for plan_par_row in get_planning_parameters(par_plan_gr,
+                                                                               cur_date=d,
+                                                                               with_pur_id=True)]}
+                if len(db_res['data']) != 0:
+                    db_res_keys = list(db_res['data'][0].keys())
+                    db_res['keys'] = get_field_props(db_res_keys)
+
     # we need list-type for returning the json-answer
     if type(db_res) == list:
         db_res_for_json = [list(line) for line in db_res]
-    elif type(db_res) == dict:
+    else:
         db_res_for_json = db_res
 
     # json-answer
     return json.dumps(db_res_for_json, sort_keys=True, ensure_ascii=False)
 
 
+@app.route('/submit/<obj>', methods=['POST'])
+def submit(obj) -> 'json':
+    try:
+        if obj == 'default':
+            add_trn_in_db(usr=request.form['user'], trn_t_id=3, prc_id=22,
+                          d=datetime.date.today(), val=request.form['val'],
+                          acc_fr=request.form['account_from'])
+        elif obj == 'planning':
+            json_inp_grouped = JSONData(json.loads(request.data)).group_data()
+            date_of_planning = datetime.date(app.config['MONTH_YEAR']['y'],
+                                             app.config['MONTH_YEAR']['m'], 1)
+            update_planning_from_json(json_inp_grouped, date_of_planning)
+        json_answ = {'class': 'success',
+                     'txt': 'Данные добавлены успешно'}
+    except SQLError:
+        json_answ = {'class': 'danger',
+                     'txt': 'Ошибка при записи'}
+    except KeyError:
+        json_answ = {'class': 'danger',
+                     'txt': 'Не все обязательные поля заполенены'}
+    except Exception as e:
+        json_answ = {'class': 'danger',
+                     'txt': str(e)}
+    finally:
+        return json.dumps(json_answ, ensure_ascii=False)
+
+
 @app.route('/planning')
 def planning() -> 'html':
-    return render_template('planning.html', the_title='Планирование')
+    d = datetime.date(app.config['MONTH_YEAR']['y'], app.config['MONTH_YEAR']['m'], 1)
+    plan = {'incomes': get_planning_parameters('INC', cur_date=d),
+            'total_incomes': get_planning_sums_by_user(cur_date=d),
+            'costs_man': get_planning_parameters('MAN', d),
+            'costs_opt': get_planning_parameters(cur_date=d),
+            'costs_out': get_planning_parameters('OUT', d)}
+
+    return render_template('planning.html',
+                           the_title='Планирование',
+                           the_plan=plan,
+                           for_nav=detect_general_parameters(app.config['MONTH_YEAR']['m'],
+                                                             app.config['MONTH_YEAR']['y']))
 
 
 @app.teardown_appcontext

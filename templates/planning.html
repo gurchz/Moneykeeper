@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block body %}
+{% include "navbar.html" %}
+{% include "planning_modal.html" %}
+
+<div class="container">
+	<div class="row">
+
+		<!-- Доходы -->
+		<div class="col-lg-5">
+			<h5 class="display-4 mb-3 text-center">Доходы</h5>
+
+			<!-- general incomes -->
+			<div class="container shadow p-3 mb-3 incomes-plan rounded">
+				<div class="container shadow mb-3 bg-light pt-2 rounded">
+					<div class="row text-center">
+						{% if the_plan.total_incomes|length() != 0 %}
+						{% for tot_row in the_plan.total_incomes %}
+						<div class="col">
+							{% for tot_col in tot_row %}
+							<p>{{ tot_col }}</p>
+							{% endfor %}
+						</div>
+						{% endfor %}
+						{% else %}
+						<p class="col-12">Нет данных</p>
+						{% endif %}
+					</div>
+				</div>
+
+				<!-- paing dates -->
+				<div class="container shadow mb-3 bg-light rounded">
+					<div class="float-right p-2">
+						<button type="button" id="btnEditIncome" class="btn btn-primary rounded-circle edit-plan">
+							<i class="fas fa-pencil-alt"></i>
+						</button>
+					</div>
+					<h5 class="pt-3">Ближайшие выплаты</h5>
+					<table class="table table-hover transact-table">
+						<tbody>
+							{% if the_plan.incomes|length() != 0 %}
+							{% for plan_row in the_plan.incomes %}
+							<tr>
+								{% for plan_col in plan_row %}
+								<td>{{ plan_col }}</td>
+								{% endfor %}
+							</tr>
+							{% endfor %}
+							{% else %}
+							<p>Нет данных</p>
+							{% endif %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-7">
+			<h5 class="display-4 text-center">Расходы</h5>
+			<div class="container shadow p-3 costs-plan rounded">
+				<div class="row">
+					<div class="col-md-6">
+						<div class="container shadow pt-2 rounded bg-light">
+							<div class="float-right p-2">
+								<button type="button" id="btnEditMan" class="btn btn-primary rounded-circle edit-plan">
+									<i class="fas fa-pencil-alt"></i>
+								</button>
+							</div>
+							<h5>Обязательные</h5>
+							<table class="table table-hover">
+								<tbody>
+									{% if the_plan.costs_man|length() != 0 %}
+									{% for costs_man_r in the_plan.costs_man %}
+									<tr>
+										{% for costs_man_c in costs_man_r %}
+										<td>{{ costs_man_c }}</td>
+										{% endfor %}
+									</tr>
+									{% endfor %}
+									{% else %}
+									<p>Нет данных</p>
+									{% endif %}
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="container shadow pt-2 bg-light rounded">
+							<div class="float-right p-2">
+								<button type="button" id="btnEditOpt" class="btn btn-primary rounded-circle edit-plan">
+									<i class="fas fa-pencil-alt"></i>
+								</button>
+							</div>
+							<h5>Необязательные</h5>
+							<table class="table table-hover">
+								<tbody>
+								{% if the_plan.costs_opt|length() != 0 %}
+								{% for costs_r in the_plan.costs_opt %}
+									<tr>
+										{% for costs_c in costs_r %}
+										<td>{{ costs_c }}</td>
+										{% endfor %}
+									</tr>
+								{% endfor %}
+								{% else %}
+								<p>Нет данных</p>
+								{% endif %}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+				<div class="container shadow pt-4 rounded bg-light">
+					<div class="float-right p-2">
+						<button type="button" id="btnEditOut" class="btn btn-primary rounded-circle edit-plan">
+							<i class="fas fa-pencil-alt"></i>
+						</button>
+					</div>
+					<h5>Непредвиденные</h5>
+					<table class="table table-hover transact-table">
+						<tbody>
+							{% if the_plan.costs_out|length() != 0 %}
+							{% for pl_r in the_plan.costs_out %}
+							<tr>
+								{% for pl_c in pl_r %}
+								<td>{{pl_c}}</td>
+								{% endfor %}
+							</tr>
+							{% endfor %}
+							{% else %}
+							<p>Нет данных</p>
+							{% endif %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script>addingEventListenerForPl()</script>
+{% endblock %}

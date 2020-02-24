@@ -16,7 +16,7 @@
 					<div class="col-md-4 text-center mt-3">
 						<p>Заработано: <span id="total_income">{{ the_dash.month_totals.incomes }}</span></p>
 						<p>Потрачено: <span id="total_cost">{{ the_dash.month_totals.costs }}</span></p>
-						<p>Баланс: <span id="balTotal">{{ the_dash.cur_balance }}</span></p>
+						<p>Баланс: <span id="balTotal"></span></p>
 					</div>
 				</div>
 				<div class="row shadow mt-4 mb-4">
@@ -77,9 +77,9 @@
 		<div class="col-md-6">
 			<div class="border shadow p-4">
 				<p class="text-center">Управление сберсчетом</p>
-				<p>Баланс: <span id="balSber">{{the_dash.sber_balance}}</span></p>
+				<p>Баланс: <span id="balSber"></span></p>
 				<p class="text-center mt-1">Недавние операции</p>
-				<table id="tblSber" class="table table-hover">
+				<table id="tblSber" class="table table-hover table-responsive">
 					<tr>
 						<td>Пополнение</td>
 						<td>20 марта 2019</td>
@@ -92,7 +92,7 @@
 						<td>На билеты</td>
 					</tr>
 				</table>
-				<button id="addSber" type="button" class="btn btn-primary rounded-pill shadow pl-3 pr-3" data-target="#sberManage" onclick="creatingXMLHttpReq('show_accounts',this.getAttribute('data-target'))">
+				<button id="addSber" type="button" class="btn btn-primary rounded-pill shadow pl-3 pr-3" data-target="#sberManage" onclick="creatingXMLHttpReq(['show_accounts', 'show_users'],this.getAttribute('data-target'));enabledBtnInCal(['accountsInModal', 'userInModal', 'val'], 'btnAddFromTrnModald')">
 					<i class="fas fa-donate"></i> Добавить операцию
 				</button>
 				{% include 'sber_modal.html' %}
@@ -156,4 +156,5 @@
 				 							   "borderWidth":1}]},
 			"options":{"scales":{"yAxes":[{"ticks":{"beginAtZero":true}}]}}});
 </script>
+<script type="text/javascript">updBalances();</script>
 {% endblock %}

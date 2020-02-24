@@ -1,0 +1,29 @@
+<div class="modal fade" id="planningModal" tabindex="-1" role="dialog" aria-labelledby="dailyTrnModalHeader" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="planningModalHeader">Планирование</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" >
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modalContentPlanning">
+                <!-- AJAX request -->
+            </div>
+            <div class="modal-footer">
+                <button id="fromPrevMonth" class="btn rounded-pill shadeow pr-3 pl-3" type="button">
+                    <i class="far fa-calendar-minus"></i> Из пр. месяца
+                </button>
+                <button class="btn btn-success rounded-pill shadow pr-3 pl-3" type="button">
+                    <i class="fas fa-plus"></i> Добавить
+                </button>
+                <button class="btn btn-danger rounded-pill shadow pr-3 pl-3" data-dismiss="modal">
+                    <i class="far fa-times-circle"></i> Отмена
+                </button>
+                <button id="planningSave" class="btn btn-primary rounded-pill shadow pr-3 pl-3" type="submit"  id="btnPlanningSave">
+                    <i class="far fa-save"></i> Cохранить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,35 @@
+<div class="modal fade" id="sberManage" tabindex="-1" role="dialog" aria-labelledby="sberManageHeader" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title" id="sberManageHeader">Управление сберсчетом</h4>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+            <form name="sberForm" method="POST">
+                <div class="modal-body sberform-sel">
+                    <i class="fas fa-wallet"></i>
+                    <select id="accountsInModal" onchange="enabledBtnInCal(['accountsInModal', 'userInModal', 'val'], 'btnAddFromTrnModald')" class="form-control mb-2" name="account_from">
+                        <option>Выбор...</option>
+                    </select>
+
+                    <i class="far fa-user"></i>
+                    <select id="userInModal" class="form-control mb-2" name="user" onchange="enabledBtnInCal(['accountsInModal', 'userInModal', 'val'], 'btnAddFromTrnModald')">
+                        <option>Выбор...</option>
+                    </select>
+
+                    <i class="fas fa-dollar-sign"></i>
+                    <input type="text" class="form-control mb-2" placeholder="Сумма" id="val" name="val" onchange="checkSumData(this.id);enabledBtnInCal(['accountsInModal', 'userInModal', 'val'], 'btnAddFromTrnModald')">
+                    
+                    <i class="far fa-comments"></i>
+                    <textarea placeholder="Комментарий" class="form-control" id="comment" name="comment"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger rounded-pill shadow pr-3 pl-3" data-dismiss="modal">Отмена</button>
+                    <button class="btn btn-primary rounded-pill shadow pr-3 pl-3" type="button" onclick="creatingXMLHttpReq('send_sber_data', this, 'POST', 'sberForm')" id="btnAddFromTrnModald">Сохранить</button>
+                </div>
+            </form>
+		</div>
+	</div>
+</div>

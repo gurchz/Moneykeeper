@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker, scoped_session
 import datetime
+import re
 
 eng = create_engine('mysql://root:mysql@localhost/moneykeeper?charset=utf8mb4')
 db_session = scoped_session(sessionmaker(autoflush=False,
@@ -194,6 +195,60 @@ def get_sber_transactions(m, y):
             WHERE MONTH(t.date) = :w1 AND YEAR(t.date) = :w2
             AND transacion_type_id = 3 ORDER BY t.date'''
     return db_session.execute(sql_for_sber_trns, {'w1': m, 'w2': y}).fetchall()
+
+
+def get_planning_parameters(pl_gr_id='OPT', cur_date='DATE_FORMAT(CURDATE(), %Y-%m-01', with_pur_id=False):
+    """Get planning parameters for current month"""
+    sql_select_part = '''SELECT CONCAT(g.name, ' - ', p.name) pp_name, IFNULL(pp.planning_date, 'Нет даты') pp_date, 
+    pp.pp_val pp_val'''
+    sql_from_part = '''
+        FROM planning_parameter pp 
+            INNER JOIN purchase p ON pp.purchase_id = p.purchase_id
+            INNER JOIN group_goods g ON p.group_goods_id = g.group_goods_id
+        WHERE p.planning_group_pl_gr_id = :w2
+            AND pp.date_from <= :w3 AND pp.date_to > :w3'''
+    if with_pur_id:
+        sql_select_part += ', pp.purchase_id pp_pur_id'
+    sql_for_pp = sql_select_part + sql_from_part
+    return db_session.execute(sql_for_pp, {'w2': pl_gr_id,
+                                           'w3': cur_date}).fetchall()
+
+
+def get_planning_sums_by_user(limit=2, tr_type_id=1, cur_date='DATE_FORMAT(CURDATE(), %Y-%m-01'):
+    """Get planning earnings per user"""
+    sql_for_sums_by_user = '''SELECT u.fname username, SUM(pp.pp_val) FROM planning_parameter pp INNER JOIN user u
+        ON pp.user_id = u.user_id
+    WHERE pp.purchase_id IN (SELECT p.purchase_id FROM purchase p INNER JOIN group_goods g
+        ON p.group_goods_id = g.group_goods_id WHERE g.transacion_type_id = :w2)
+            AND pp.date_from <= :w3 AND pp.date_to > :w3
+    GROUP BY u.fname LIMIT :w1;'''
+    return db_session.execute(sql_for_sums_by_user, {'w1': limit,
+                                                     'w2': tr_type_id,
+                                                     'w3': cur_date}).fetchall()
+
+
+def get_planning_groups():
+    """Show planning groups"""
+    return db_session.execute('''SELECT pl_gr_id, name FROM planning_group''').fetchall()
+
+
+def update_planning_from_json(json_obj, date_of_planning):
+    """Updating planning parameters from JSON-object"""
+    sql_for_updating = 'CALL edit_planning_parameter(:w1, :w2, :w3, :w4, :w5)'
+    planning_user = 1
+    for json_row in json_obj:
+        if re.match(r'^\d{4}-\d{2}-\d{2}', json_row['pp_date']) is None:
+            json_row['pp_date'] = None
+        try:
+            db_session.execute(sql_for_updating, {'w1': json_row['pp_val'],
+                                                  'w2': date_of_planning,
+                                                  'w3': json_row['pp_name'],
+                                                  'w4': json_row['pp_date'],
+                                                  'w5': planning_user})
+            db_session.commit()
+        except Exception:
+            db_session.rollback()
+            raise SQLError('Cannot write in db')
 
 
 class SQLError(Exception):
